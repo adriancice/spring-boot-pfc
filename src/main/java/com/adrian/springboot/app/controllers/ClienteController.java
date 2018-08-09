@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,7 @@ import com.adrian.springboot.app.models.entity.Cliente;
 import com.adrian.springboot.app.models.service.IClienteService;
 import com.adrian.springboot.app.models.service.IUploadFileService;
 import com.adrian.springboot.app.util.paginator.PageRender;
+import com.adrian.springboot.app.view.xml.ClienteList;
 
 @Controller
 @SessionAttributes("cliente")
@@ -94,6 +96,11 @@ public class ClienteController {
 		model.put("titulo", messageSource.getMessage("text.cliente.detalle.titulo", null, locale).concat(": ")
 				.concat(cliente.getNombre()));
 		return "ver";
+	}
+
+	@GetMapping(value = "/listar-rest")
+	public @ResponseBody ClienteList listarRest() {
+		return new ClienteList(clienteService.findAll());
 	}
 
 	@RequestMapping(value = { "/listar", "/" }, method = RequestMethod.GET)
@@ -230,10 +237,13 @@ public class ClienteController {
 			Cliente cliente = clienteService.findOne(id);
 
 			clienteService.delete(id);
-			flash.addFlashAttribute("success", messageSource.getMessage("text.cliente.flash.eliminar.success", null, locale));
+			flash.addFlashAttribute("success",
+					messageSource.getMessage("text.cliente.flash.eliminar.success", null, locale));
 
 			if (uploadFileService.delete(cliente.getFoto())) {
-				String mensajeFotoEliminar = String.format(messageSource.getMessage("text.cliente.flash.foto.eliminar.success", null, locale), cliente.getFoto());
+				String mensajeFotoEliminar = String.format(
+						messageSource.getMessage("text.cliente.flash.foto.eliminar.success", null, locale),
+						cliente.getFoto());
 				flash.addFlashAttribute("info", mensajeFotoEliminar);
 			}
 
